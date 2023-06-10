@@ -9,7 +9,7 @@ categories = ["game-engines", "graphics"]
 
 [features]
 default = []
-codegen-fmt = []
+codegen-fmt = ["prettyplease", "syn"]
 codegen-full = []
 double-precision = []
 custom-godot = ["godot-bindings/custom-godot"]
@@ -20,6 +20,8 @@ heck = "0.4"
 nanoserde = "0.1.29"
 proc-macro2 = "1"
 quote = "1"
+prettyplease = { version = "0.2.6", optional = true }
+syn = { version = "2.0.18", features = ["full"], optional = true }
 
 # Since we don't use Regex for unicode parsing, the features unicode-bool/unicode-gencat are used instead of unicode-perl.
 # See also https://docs.rs/regex/latest/regex/#unicode-features.

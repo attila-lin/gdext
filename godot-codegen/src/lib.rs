@@ -109,20 +109,26 @@ pub fn generate_core_files(core_gen_path: &Path) {
 
 #[cfg(feature = "codegen-fmt")]
 fn rustfmt_if_needed(out_files: Vec<PathBuf>) {
+    use std::io::Read;
     println!("Format {} generated files...", out_files.len());
 
     for files in out_files.chunks(20) {
-        let mut process = std::process::Command::new("rustfmt");
-        process.arg("--edition=2021");
-
         println!("  Format {} files...", files.len());
         for file in files {
-            process.arg(file);
-        }
+            let mut f = std::fs::File::open(file).unwrap_or_else(|err| {
+                panic!("during godot-rust codegen, failed to open file for rustfmt:\n   {err}")
+            });
+            let mut src = String::new();
+            f.read_to_string(&mut src).expect("Unable to read file");
+            drop(f);
 
-        process
-            .output()
-            .unwrap_or_else(|err| panic!("during godot-rust codegen, rustfmt failed:\n   {err}"));
+            let syntax = syn::parse_file(&src).expect("Unable to parse file");
+            let pretty = prettyplease::unparse(&syntax);
+
+            std::fs::write(file, pretty).unwrap_or_else(|err| {
+                panic!("during godot-rust codegen, failed to write file for rustfmt:\n   {err}")
+            });
+        }
     }
 
     println!("Rustfmt completed.");
